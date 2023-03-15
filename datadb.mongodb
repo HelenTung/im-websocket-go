@@ -1,0 +1,28 @@
+// MongoDB Playground
+// To disable this template go to Settings | MongoDB | Use Default Template For Playground.
+// Make sure you are connected to enable completions and to be able to run a playground.
+// Use Ctrl+Space inside a snippet or a string literal to trigger completions.
+
+// Select the database to use.
+use('im');
+
+db.user_basic.insertOne([
+  {'account': 'ArchLinux', 'password': '123456', 'nickname': '1', 'sex': 0 ,'email':'邮箱','avatar':'头像','created_at':1,'updated_at':1 },
+]);
+
+db.user_basic.insertOne([
+  {'account': 'Arch', 'password': '123456', 'nickname': '2', 'sex': 0 ,'email':'邮箱','avatar':'头像','created_at':1,'updated_at':1 },
+]);
+
+// db.message_basic.insertOne([
+//   {'user_identity': '唯一标识', 'root_identity': '房间唯一标识', 'data': '发送的数据', 'created_at':1,'updated_at':1 },
+// ]);
+
+// db.root_basic.insertOne([
+//   {'number': '房间号', 'name': '房间名字', 'info': '房间简介', 'user_identity': '唯一标识','created_at':1,'updated_at':1 },
+// ]);
+
+// db.user_root.insertOne([
+//   {'user_identity': '唯一标识', 'root_identity': '房间唯一标识', 'message_identity': '消息唯一标识', 'created_at':1,'updated_at':1 },
+// ]);
+
