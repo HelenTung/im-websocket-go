@@ -4,5 +4,5 @@ import "main/router"
 
 func main() {
 	e := router.Router()
-	e.Run(":9090")
+	e.Run(":8080")
 }

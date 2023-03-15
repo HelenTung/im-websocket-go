@@ -216,6 +216,7 @@ func UserQuery(c *gin.Context) {
 		})
 		return
 	}
+	u, _ := c.MustGet("user_claims").(*helper.UserClaims)
 	data := &define.UserQueryResult{
 		Nickname: userBasic.Nickname,
 		Sex:      userBasic.Sex,
@@ -223,9 +224,12 @@ func UserQuery(c *gin.Context) {
 		Email:    userBasic.Email,
 		IsFriend: false,
 	}
+	if module.JudgeUserIsFriend(userBasic.Account, u.Identity) {
+		data.IsFriend = true
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
-		"msg":  "用户信息如下",
+		"msg":  "用户信息",
 		"data": data,
 	})
 }
