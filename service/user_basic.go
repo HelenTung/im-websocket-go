@@ -196,3 +196,36 @@ func Register(c *gin.Context) {
 		},
 	})
 }
+
+func UserQuery(c *gin.Context) {
+	account := c.Query("account")
+	fmt.Println(account)
+	if account == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "账号输入为空请重新输入",
+		})
+		return
+	}
+	userBasic, err := module.GetUserBasicAccount(account)
+	if err != nil {
+		log.Println("[DB ERROR]:", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "数据查询失败",
+		})
+		return
+	}
+	data := &define.UserQueryResult{
+		Nickname: userBasic.Nickname,
+		Sex:      userBasic.Sex,
+		Avatar:   userBasic.Avatar,
+		Email:    userBasic.Email,
+		IsFriend: false,
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "用户信息如下",
+		"data": data,
+	})
+}

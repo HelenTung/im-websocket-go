@@ -35,7 +35,16 @@ func GetUserBasicAccountPassword(account, password string) (*UserBasic, error) {
 
 func GetUserBasicIdentity(id string) (*UserBasic, error) {
 	ub := new(UserBasic)
-	filter := bson.M{"identity": id}
+	filter := bson.M{"account": id}
+	err := Mongo.Collection(UserBasic{}.CollectionName()).
+		FindOne(context.Background(), filter).
+		Decode(ub)
+	return ub, err
+}
+
+func GetUserBasicAccount(account string) (*UserBasic, error) {
+	ub := new(UserBasic)
+	filter := bson.M{"account": account}
 	err := Mongo.Collection(UserBasic{}.CollectionName()).
 		FindOne(context.Background(), filter).
 		Decode(ub)

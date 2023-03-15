@@ -13,3 +13,11 @@ type MessageStruct struct {
 	Message      string `json:"message"`
 	RoomIdentity string `json:"room_identity"`
 }
+
+type UserQueryResult struct {
+	Nickname string `json:"nickname,omitempty"`
+	Avatar   string `json:"avatar,omitempty"`
+	Sex      int    `json:"sex,omitempty"`
+	Email    string `json:"email,omitempty"`
+	IsFriend bool   `json:"is_friend"`
+}
