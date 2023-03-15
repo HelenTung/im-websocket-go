@@ -199,7 +199,6 @@ func Register(c *gin.Context) {
 
 func UserQuery(c *gin.Context) {
 	account := c.Query("account")
-	fmt.Println(account)
 	if account == "" {
 		c.JSON(http.StatusOK, gin.H{
 			"code": -1,
@@ -224,12 +223,95 @@ func UserQuery(c *gin.Context) {
 		Email:    userBasic.Email,
 		IsFriend: false,
 	}
-	if module.JudgeUserIsFriend(userBasic.Account, u.Identity) {
+	if module.JudgeUserIsFriend(u.Identity, userBasic.Account) {
 		data.IsFriend = true
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
 		"msg":  "用户信息",
 		"data": data,
+	})
+}
+
+func UserAdd(c *gin.Context) {
+	account := c.Query("account")
+	if account == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "账号输入为空请重新输入",
+		})
+		return
+	}
+	ub, err := module.GetUserBasicAccount(account)
+	fmt.Println(ub)
+	if err != nil {
+		log.Println("[DB ERROR]:", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "数据查询失败",
+		})
+		return
+	}
+	u, _ := c.MustGet("user_claims").(*helper.UserClaims)
+	fmt.Println(u)
+	if module.JudgeUserIsFriend(u.Identity, ub.Account) {
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "互为好友、不可重复添加",
+		})
+		return
+	}
+	//添加好友、插入对应关系与房间、插入对应房间
+	rb := &module.RoomBasic{
+		Identity:     helper.GetUUID(),
+		UserIdentity: u.Identity,
+		CreatAt:      time.Now().Unix(),
+		UpdatedAt:    time.Now().Unix(),
+		Info:         ub.Account + " and " + u.Identity + " room",
+	}
+	//保存房间
+	if err := module.InsertOneRoomBasic(rb); err != nil {
+		log.Println("[DB ERROR]:", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "房间插入失败",
+		})
+		return
+	}
+	r := &module.UserRoom{
+		UserIdentity: u.Identity,
+		RoomIdentity: rb.Identity,
+		RoomType:     1,
+		CreatAt:      time.Now().Unix(),
+		UpdatedAt:    time.Now().Unix(),
+	}
+	//保存对应关系
+	if err := module.InsertOneUserRoom(r); err != nil {
+		log.Println("[DB ERROR]:", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "对应关系插入失败",
+		})
+		return
+	}
+	r1 := &module.UserRoom{
+		UserIdentity: ub.Account,
+		RoomIdentity: rb.Identity,
+		RoomType:     1,
+		CreatAt:      time.Now().Unix(),
+		UpdatedAt:    time.Now().Unix(),
+	}
+	//保存对应关系
+	if err := module.InsertOneUserRoom(r1); err != nil {
+		log.Println("[DB ERROR]:", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "对应关系插入失败",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "好友添加成功",
 	})
 }

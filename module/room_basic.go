@@ -1,6 +1,9 @@
 package module
 
+import "context"
+
 type RoomBasic struct {
+	Identity     string `bson:"identity,omitempty"`
 	Number       string `bson:"number,omitempty"`
 	Name         string `bson:"name,omitempty"`
 	Info         string `bson:"info,omitempty"`
@@ -11,4 +14,12 @@ type RoomBasic struct {
 
 func (RoomBasic) CollectionName() string {
 	return "room_basic"
+}
+
+func InsertOneRoomBasic(r *RoomBasic) error {
+	_, err := Mongo.Collection(RoomBasic{}.CollectionName()).InsertOne(context.Background(), r)
+	if err != nil {
+		return err
+	}
+	return nil
 }

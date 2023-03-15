@@ -27,6 +27,7 @@ func GetUserRoomByIdentity(Useridentity, RoomIdentity string) (*UserRoom, error)
 	return ur, err
 }
 
+// 通过房间id获取查找对应关联关系
 func GetUserRoomByRoomIdentity(RoomIdentity string) ([]*UserRoom, error) {
 	cur, err := Mongo.Collection(UserRoom{}.CollectionName()).Find(context.Background(), bson.M{"room_identity": RoomIdentity})
 	if err != nil {
@@ -46,6 +47,7 @@ func GetUserRoomByRoomIdentity(RoomIdentity string) ([]*UserRoom, error) {
 	return urs, nil
 }
 
+// 判断是否为好友
 func JudgeUserIsFriend(user1, user2 string) bool {
 	//查询user1单独房间列表
 	cur, err := Mongo.Collection(UserRoom{}.CollectionName()).
@@ -63,7 +65,7 @@ func JudgeUserIsFriend(user1, user2 string) bool {
 		}
 		curs = append(curs, ur.RoomIdentity)
 	}
-	//查询user2有多少单独房间
+	//查询user2有多少关联的单独房间
 	cur2, err := Mongo.Collection(UserRoom{}.CollectionName()).
 		CountDocuments(context.Background(), bson.M{"user_identity": user2, "room_identity": bson.M{"$in": curs}, "room_type": 1})
 	if err != nil {
@@ -74,4 +76,13 @@ func JudgeUserIsFriend(user1, user2 string) bool {
 		return true
 	}
 	return false
+}
+
+// 插入用户与房间对应关系
+func InsertOneUserRoom(ur *UserRoom) error {
+	_, err := Mongo.Collection(UserRoom{}.CollectionName()).InsertOne(context.Background(), ur)
+	if err != nil {
+		return err
+	}
+	return nil
 }
