@@ -35,7 +35,7 @@ func WebsocketMessage(c *gin.Context) {
 			log.Printf("Read error:%v\n", err)
 			return
 		}
-		//fmt.Println(uc.Identity, ms.RoomIdentity)
+		fmt.Println(uc.Identity, ms.RoomIdentity)
 		//TODO:判断用户是否属于消息体的房间
 		_, err = module.GetUserRoomByIdentity(uc.Identity, ms.RoomIdentity)
 		if err != nil {

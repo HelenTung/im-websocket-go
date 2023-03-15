@@ -315,3 +315,44 @@ func UserAdd(c *gin.Context) {
 		"msg":  "好友添加成功",
 	})
 }
+
+func UserDelete(c *gin.Context) {
+	account := c.Query("account")
+	fmt.Println(account)
+	if account == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "删除空账号好友",
+		})
+		return
+	}
+	u := c.MustGet("user_claims").(*helper.UserClaims)
+	//获取房间id
+	mrs := module.GetUserRoomIdentity(account, u.Identity)
+	if mrs == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "该账号并非好友、请确认输入是否正确",
+		})
+		return
+	}
+	if err := module.DeleUserRoom(mrs); err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "删除对应关系错误、请重试",
+		})
+		return
+	}
+	if err := module.DeleRoomBasic(mrs); err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "删除房间错误错误、请重试",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "成功删除好友",
+	})
+
+}

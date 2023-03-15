@@ -74,6 +74,18 @@ func SendCode(toUserEmail, code string) error {
 	return e.Send("smtp.gmail.com:587", smtp.PlainAuth("", "denghailun1635161916@gmail.com", define.MailPassword, "smtp.gmail.com"))
 }
 
+// func SendCode(toUserEmail, code string) error {
+// 	e := email.NewEmail()
+// 	e.From = "<3490498885@qq.com>"
+// 	e.To = []string{toUserEmail}
+// 	e.Subject = "验证码已经发送，请注意查收"
+// 	e.HTML = []byte("您的验证码:<b>" + code + "</b>")
+// 	// return e.SendWithStartTLS("smtp.qq.com:465",
+// 	// 	smtp.PlainAuth("", "3490498885@qq.com", define.MailPassword, "smtp.qq.com"),
+// 	// 	&tls.Config{InsecureSkipVerify: true, ServerName: "smtp.qq.com"})
+// 	return e.Send("smtp.qq.com:465", smtp.PlainAuth("", "3490498885@qq.com", define.MailPassword, "smtp.qq.com"))
+// }
+
 // GetCode
 // 生存验证码
 func GetCode() string {

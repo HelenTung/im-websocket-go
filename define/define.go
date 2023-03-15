@@ -2,9 +2,13 @@ package define
 
 //var MailPassword = os.Getenv("MailPassword")
 
+// gamil
 var MailPassword = "fdzfhynnasqutkoa"
 
 // var MailPassword = "gqvityxmdrgiuoip"
+
+// qq
+// var MailPassword = "oyimwoehnurdcjhh"
 var RegisterPrefix = "TOKEN_"
 var ExpireTime = 300
 

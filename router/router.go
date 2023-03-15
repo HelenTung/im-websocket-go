@@ -27,5 +27,7 @@ func Router() *gin.Engine {
 	auth.GET("/chat/list", service.ChatList)
 	//添加好友
 	auth.POST("/user/add", service.UserAdd)
+	//删除好友
+	auth.DELETE("/user/delete", service.UserDelete)
 	return r
 }
