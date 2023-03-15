@@ -2,12 +2,14 @@ package helper
 
 import (
 	"crypto/md5"
-	"crypto/tls"
 	"fmt"
 	"main/define"
+	"math/rand"
 	"net/smtp"
+	"strconv"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gofrs/uuid"
 	"github.com/jordan-wright/email"
 )
 
@@ -66,8 +68,30 @@ func SendCode(toUserEmail, code string) error {
 	e.To = []string{toUserEmail}
 	e.Subject = "验证码已经发送，请注意查收"
 	e.HTML = []byte("您的验证码:<b>" + code + "</b>")
-	return e.SendWithStartTLS("smtp.gmail.com:587",
-		smtp.PlainAuth("", "denghailun1635161916@gmail.com", define.MailPassword, "smtp.gmail.com"),
-		&tls.Config{InsecureSkipVerify: true, ServerName: "smtp.gmail.com"})
-	//return e.Send("smtp.gmail.com:587", smtp.PlainAuth("", "denghailun1635161916@gmail.com", define.MailPassword, "smtp.gmail.com"))
+	// return e.SendWithStartTLS("smtp.gmail.com:587",
+	// 	smtp.PlainAuth("", "denghailun1635161916@gmail.com", define.MailPassword, "smtp.gmail.com"),
+	// 	&tls.Config{InsecureSkipVerify: true, ServerName: "smtp.gmail.com"})
+	return e.Send("smtp.gmail.com:587", smtp.PlainAuth("", "denghailun1635161916@gmail.com", define.MailPassword, "smtp.gmail.com"))
+}
+
+// GetCode
+// 生存验证码
+func GetCode() string {
+	res := ""
+	for i := 0; i < 6; i++ {
+		res += strconv.Itoa(rand.Intn(10))
+	}
+	//fmt.Println(res)
+	return res
+}
+
+// GetUUID
+// 生成唯一标识码
+func GetUUID() string {
+	u, err := uuid.NewV4()
+	if err != nil {
+		return ""
+	}
+	fmt.Println(u)
+	return fmt.Sprintf("%x", u)
 }

@@ -43,6 +43,20 @@ func GetUserBasicIdentity(id string) (*UserBasic, error) {
 }
 
 func GetUserBasicEmail(email string) (int64, error) {
+
 	return Mongo.Collection(UserBasic{}.CollectionName()).
 		CountDocuments(context.Background(), bson.M{"email": email})
+}
+
+func GuiceUserBasicAccount(account string) (int64, error) {
+	return Mongo.Collection(UserBasic{}.CollectionName()).
+		CountDocuments(context.Background(), bson.M{"account": account})
+}
+
+func InsertOneUserBasic(u *UserBasic) error {
+	_, err := Mongo.Collection(UserBasic{}.CollectionName()).InsertOne(context.Background(), u)
+	if err != nil {
+		return err
+	}
+	return nil
 }

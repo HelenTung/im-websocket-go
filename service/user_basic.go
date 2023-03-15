@@ -1,10 +1,14 @@
 package service
 
 import (
+	"context"
+	"fmt"
 	"log"
+	"main/define"
 	"main/helper"
 	"main/module"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -85,9 +89,18 @@ func SendCode(c *gin.Context) {
 		})
 		return
 	}
-	err = helper.SendCode(email, "3241")
+	code := helper.GetCode()
+	err = helper.SendCode(email, code)
 	if err != nil {
 		log.Panicln("[ERROR]:", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "系统错误",
+		})
+		return
+	}
+	err = module.Rdb.Set(context.Background(), define.RegisterPrefix+email, code, time.Second*time.Duration(define.ExpireTime)).Err()
+	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code": -1,
 			"msg":  "系统错误",
@@ -97,5 +110,89 @@ func SendCode(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
 		"msg":  "邮箱发送成功",
+	})
+}
+
+func Register(c *gin.Context) {
+
+	code := c.Query("code")
+	email := c.Query("email")
+	account := c.Query("account")
+	password := c.Query("password")
+
+	fmt.Println("postform", code, email, account, password)
+	if code == "" || email == "" || account == "" || password == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "输入为空、请重新输入",
+		})
+		return
+	}
+	//判断账号是否唯一
+	acc, err := module.GuiceUserBasicAccount(account)
+	if err != nil {
+		log.Println("[DB ERROR]", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "系统错误",
+		})
+		return
+	}
+	if acc > 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "账号已被注册、请重新输入",
+		})
+		return
+	}
+	//校验验证码是否正确
+	r, err := module.Rdb.Get(context.Background(), define.RegisterPrefix+email).Result()
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "验证码已经过期、请重新获取",
+		})
+		return
+	}
+	if r != code {
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "验证码不正确、请重新输入",
+		})
+		return
+	}
+
+	//注册流程、申请新对象、写入数据库、获取token
+	ub := &module.UserBasic{
+		Identity:  helper.GetUUID(),
+		Account:   account,
+		Password:  password,
+		Email:     email,
+		CreatAt:   time.Now().Unix(),
+		UpdatedAt: time.Now().Unix(),
+	}
+	err = module.InsertOneUserBasic(ub)
+	if err != nil {
+		log.Println("[DB ERROR]", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "系统错误",
+		})
+		return
+	}
+	token, err := helper.GenerateToken(ub.Identity, ub.Email)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "系统错误",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "注册成功",
+		"data": gin.H{
+			"token": token,
+		},
 	})
 }
